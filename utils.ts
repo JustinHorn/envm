@@ -102,7 +102,7 @@ export const printEnvToConsole = async (envPath: string) => {
 
 export const saveRotationToJSON = async (
   rotatingVars: string[],
-  nameOfSafe: string,
+  nameOfRotation: string,
   configName: string,
   envLocation: string
 ) => {
@@ -114,13 +114,13 @@ export const saveRotationToJSON = async (
     (p, c, i) => ({ ...p, [c[0]]: c[1] }),
     {}
   ) as { [key: string]: string };
-  let savedValuesJSON = {};
+  let rotation = {};
   if (rotatingVars.length) {
-    savedValuesJSON = rotatingVars
+    rotation = rotatingVars
       .map((vName) => ({ [vName]: envAsJSON[vName] }))
       .reduce((p, c) => ({ ...p, ...c }), {});
   } else {
-    savedValuesJSON = envAsJSON;
+    rotation = envAsJSON;
   }
   const pathToSafeJSON = getPathToJSON(configName);
   const safeJSONFile = Bun.file(pathToSafeJSON);
@@ -129,8 +129,8 @@ export const saveRotationToJSON = async (
     const safeJSONContent = await safeJSONFile.text();
     safeJSON = JSON.parse(safeJSONContent);
   }
-  const newSAFEJSON = { ...safeJSON, [nameOfSafe]: savedValuesJSON };
-  const newSafeJSONString = JSON.stringify(newSAFEJSON);
+  const newSafeJSON = { ...safeJSON, [nameOfRotation]: rotation };
+  const newSafeJSONString = JSON.stringify(newSafeJSON);
   await Bun.write(safeJSONFile, newSafeJSONString);
 };
 
@@ -154,42 +154,42 @@ export const doesTheUserWantToCreateANewConfig = async (): Promise<boolean> => {
   throw Error("Error reading user input");
 };
 
-export const printSafesToConsole = async (
+export const printRotationNamesOrRotationContent = async (
   configName: string,
-  nameOfSafe?: string
+  nameOfRotation?: string
 ) => {
   const pathToJSON = getPathToJSON(configName);
   const jsonFile = Bun.file(pathToJSON);
   if (!(await jsonFile.exists())) {
-    console.warn("No safes for config of current dir exists");
+    console.warn("No safes of rotations for config of current dir exists");
     return;
   }
   const jsonContent = await jsonFile.text();
   const json = JSON.parse(jsonContent);
   if (typeof json === "object" && json !== null) {
-    if (!nameOfSafe) {
+    if (!nameOfRotation) {
       const keys = Object.keys(json);
       keys.forEach((k) => console.log(k));
     } else {
-      const safe = json[nameOfSafe];
-      if (safe) {
-        const keys = Object.keys(safe);
-        keys.forEach((k) => console.log(`${k}=${safe[k]}`));
+      const rotation = json[nameOfRotation];
+      if (rotation) {
+        const keys = Object.keys(rotation);
+        keys.forEach((k) => console.log(`${k}=${rotation[k]}`));
       } else {
-        console.error(`No safe with the name "${nameOfSafe}" exists`);
+        console.error(`No rotation with the name "${nameOfRotation}" exists`);
       }
     }
   }
 };
 
-export const doesTheUserWantsToDeleteASpecificSafe = async (
+export const doesTheUserWantsToDeleteRotationX = async (
   configName: string,
-  nameOfSafe: string
+  nameOfRotation: string
 ): Promise<boolean> => {
   console.log(
-    `Are you sure that you want to delete the safe "${nameOfSafe}"?\nIt contains:`
+    `Are you sure that you want to delete the rotation "${nameOfRotation}"?\nIt contains:`
   );
-  await printSafesToConsole(configName, nameOfSafe);
+  await printRotationNamesOrRotationContent(configName, nameOfRotation);
   console.log("-------");
   console.log("If yes enter Y or else N");
   for await (const line of console) {
@@ -201,28 +201,28 @@ export const doesTheUserWantsToDeleteASpecificSafe = async (
         return false;
       default:
         console.log(
-          `You need to enter Y or N. Shall the safe "${nameOfSafe}" get deleted? (Y/N)`
+          `You need to enter Y or N. Shall the rotation "${nameOfRotation}" get deleted? (Y/N)`
         );
     }
   }
   throw Error("Error reading user input");
 };
 
-export const doesSafeExists = async (
+export const doesRotationExists = async (
   configName: string,
-  nameOfSafe: string
+  nameOfRotation: string
 ) => {
   const pathToJSON = getPathToJSON(configName);
   const jsonFile = Bun.file(pathToJSON);
   if (!(await jsonFile.exists())) {
-    console.warn("No safes for config of current dir exist");
+    console.warn("No safes of rotations for config of current dir exist");
     return false;
   }
   const jsonContent = await jsonFile.text();
   const json = JSON.parse(jsonContent);
   if (typeof json === "object" && json !== null) {
-    const safe = json[nameOfSafe];
-    if (safe) {
+    const rotation = json[nameOfRotation];
+    if (rotation) {
       return true;
     }
   }
@@ -231,7 +231,7 @@ export const doesSafeExists = async (
 
 export const deleteRotationFromJSON = async (
   configName: string,
-  nameOfSafe: string
+  nameOfRotation: string
 ) => {
   const pathToSafeJSON = getPathToJSON(configName);
   const safeJSONFile = Bun.file(pathToSafeJSON);
@@ -240,15 +240,15 @@ export const deleteRotationFromJSON = async (
     const safeJSONContent = await safeJSONFile.text();
     safeJSON = JSON.parse(safeJSONContent);
   }
-  const newSAFEJSON = { ...safeJSON, [nameOfSafe]: undefined };
-  const newSafeJSONString = JSON.stringify(newSAFEJSON);
+  const newSafeJSON = { ...safeJSON, [nameOfRotation]: undefined };
+  const newSafeJSONString = JSON.stringify(newSafeJSON);
   await Bun.write(safeJSONFile, newSafeJSONString);
-  console.log(`Deleted safe "${nameOfSafe}"`);
+  console.log(`Deleted rotation "${nameOfRotation}"`);
 };
 
-export const loadSafe = async (
+export const loadRotation = async (
   configName: string,
-  safeName: string
+  rotationName: string
 ): Promise<{ [key: string]: string } | false> => {
   const pathToJSON = getPathToJSON(configName);
   const jsonFile = Bun.file(pathToJSON);
@@ -258,9 +258,9 @@ export const loadSafe = async (
   const jsonContent = await jsonFile.text();
   const json = JSON.parse(jsonContent);
   if (typeof json === "object" && json !== null) {
-    const safe = json[safeName];
-    if (safe) {
-      return safe;
+    const rotation = json[rotationName];
+    if (rotation) {
+      return rotation;
     } else {
       return false;
     }
@@ -268,13 +268,13 @@ export const loadSafe = async (
   return false;
 };
 
-export const applySafe = async (
-  safe: { [key: string]: string },
+export const applyRotation = async (
+  rotation: { [key: string]: string },
   envLocation: string
 ) => {
-  const keys = Object.keys(safe);
+  const keys = Object.keys(rotation);
   for (const key of keys) {
-    await setEnv(key, safe[key], envLocation);
+    await setEnv(key, rotation[key], envLocation);
   }
 };
 

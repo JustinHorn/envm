@@ -3,17 +3,17 @@
 import { exit } from "process";
 
 import {
-  applySafe,
+  applyRotation,
   createConfig,
   deleteRotationFromJSON,
   doesConfigExist,
-  doesSafeExists,
+  doesRotationExists,
   doesTheUserWantToCreateANewConfig,
-  doesTheUserWantsToDeleteASpecificSafe,
+  doesTheUserWantsToDeleteRotationX,
   getEnv,
   getPathToConfig,
-  loadSafe,
-  printSafesToConsole,
+  loadRotation,
+  printRotationNamesOrRotationContent,
   saveRotationToJSON,
 } from "./utils";
 import { loadConfig, openConfigWithNano, printEnvToConsole } from "./utils";
@@ -59,54 +59,57 @@ switch (argOne) {
       );
       exit();
     }
-    const safe = await loadSafe(configName, safeToBeApplied);
+    const safe = await loadRotation(configName, safeToBeApplied);
     if (!safe) {
       console.error(
         `Safe "${safeToBeApplied}" does not exist and can therefore not be applied.`
       );
       exit();
     }
-    await applySafe(safe, envLocation);
+    await applyRotation(safe, envLocation);
     console.log("Set all variables successfully.");
     exit();
   case "-l":
     // list safes and their names:
-    const safeToList = argTwo;
-    await printSafesToConsole(configName, safeToList);
+    const nameOfRotation = argTwo;
+    await printRotationNamesOrRotationContent(configName, nameOfRotation);
     exit();
   case "-ld":
-    // delete from save
-    const safeToGetDeleted = argTwo;
-    const saveExists = await doesSafeExists(configName, safeToGetDeleted);
+    // delete rotation from safe
+    const rotationToGetDeleted = argTwo;
+    const saveExists = await doesRotationExists(
+      configName,
+      rotationToGetDeleted
+    );
     if (!saveExists) {
       console.error(
-        `Safe "${safeToGetDeleted}" does not exist and can therefore not get deleted`
+        `Safe "${rotationToGetDeleted}" does not exist and can therefore not get deleted`
       );
       exit();
     }
-    const userConfirmedDeletion = await doesTheUserWantsToDeleteASpecificSafe(
+    const userConfirmedDeletion = await doesTheUserWantsToDeleteRotationX(
       configName,
-      safeToGetDeleted
+      rotationToGetDeleted
     );
     if (userConfirmedDeletion)
-      await deleteRotationFromJSON(configName, safeToGetDeleted);
+      await deleteRotationFromJSON(configName, rotationToGetDeleted);
     exit();
   case "-s":
     // save variables in current env as rotation
-    const safeName = argTwo;
-    if (safeName) {
+    const rotationName = argTwo;
+    if (rotationName) {
       await saveRotationToJSON(
         config.rotatingVars,
-        safeName,
+        rotationName,
         configName,
         envLocation
       );
     } else {
       console.error(
-        `You need to provide a second argument as name for the safe: setenv -s nameOfSafe...`
+        `You need to provide a second argument as name for the rotation: setenv -s nameOfRotation...`
       );
     }
-    console.log(`Saved current rotation as "${safeName}"`);
+    console.log(`Saved current rotation as "${rotationName}"`);
     exit();
   case "-g":
     // get variables in current env
