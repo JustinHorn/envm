@@ -7,6 +7,10 @@ export const getPathToConfig = (configName: string) => {
   return configurationDir + "/" + configName;
 };
 
+export const getPathToJSON = (configName: string) => {
+  return getPathToConfig(configName) + ".SAVE.json";
+};
+
 const checkConfigDirExistence = () => {
   if (!fs.existsSync(configurationDir)) {
     fs.mkdirSync(configurationDir, { recursive: true });
@@ -118,8 +122,7 @@ export const saveRotationToJSON = async (
   } else {
     savedValuesJSON = envAsJSON;
   }
-  const pathToConfig = getPathToConfig(configName);
-  const pathToSaveJSON = pathToConfig + ".SAVE.json";
+  const pathToSaveJSON = getPathToJSON(configName);
   const saveJSONFile = Bun.file(pathToSaveJSON);
   let saveJSON = {};
   if (await saveJSONFile.exists()) {
@@ -149,4 +152,32 @@ export const doesTheUserWantToCreateANewConfig = async (): Promise<boolean> => {
     }
   }
   throw Error("Error reading user input");
+};
+
+export const printSavesToConsole = async (
+  configName: string,
+  nameOfSafe?: string
+) => {
+  const pathToJSON = getPathToJSON(configName);
+  const jsonFile = Bun.file(pathToJSON);
+  if (!(await jsonFile.exists())) {
+    console.warn("No safes for config of current dir exists");
+    return;
+  }
+  const jsonContent = await jsonFile.text();
+  const json = JSON.parse(jsonContent);
+  if (typeof json === "object" && json !== null) {
+    if (!nameOfSafe) {
+      const keys = Object.keys(json);
+      keys.forEach((k) => console.log(k));
+    } else {
+      const safe = json[nameOfSafe];
+      if (safe) {
+        const keys = Object.keys(safe);
+        keys.forEach((k) => console.log(`${k}=${safe[k]}`));
+      } else {
+        console.error(`No safe with the name "${nameOfSafe}" exists`);
+      }
+    }
+  }
 };

@@ -13,6 +13,7 @@ import {
   doesTheUserWantToCreateANewConfig,
   getEnv,
   getPathToConfig,
+  printSavesToConsole,
   saveRotationToJSON,
 } from "./utils";
 import { loadConfig, openConfigWithNano, printEnvToConsole } from "./utils";
@@ -49,6 +50,11 @@ const argTwo = Bun.argv[3];
 const envLocation = configOffset + config.envLocation;
 
 switch (argOne) {
+  case "-l":
+    // list saves and their names:
+    const safeToList = argTwo;
+    await printSavesToConsole(configName, safeToList);
+    exit();
   case "-s":
     // save variables in current env as rotation
     const saveName = argTwo;
