@@ -75,7 +75,7 @@ switch (argOne) {
     console.log("Set all variables successfully.");
     exit();
   case "-l":
-    // list saves and their names:
+    // list safes and their names:
     const safeToList = argTwo;
     await printSafesToConsole(configName, safeToList);
     exit();
@@ -98,20 +98,20 @@ switch (argOne) {
     exit();
   case "-s":
     // save variables in current env as rotation
-    const saveName = argTwo;
-    if (saveName) {
+    const safeName = argTwo;
+    if (safeName) {
       await saveRotationToJSON(
         config.rotatingVars,
-        saveName,
+        safeName,
         configName,
         envLocation
       );
     } else {
       console.error(
-        `You need to provide a second argument as name for the save: setenv -s nameOfSave...`
+        `You need to provide a second argument as name for the safe: setenv -s nameOfSafe...`
       );
     }
-    console.log(`Saved current rotation as "${saveName}"`);
+    console.log(`Saved current rotation as "${safeName}"`);
     exit();
   case "-g":
     // get variables in current env

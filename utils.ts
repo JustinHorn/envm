@@ -8,7 +8,7 @@ export const getPathToConfig = (configName: string) => {
 };
 
 export const getPathToJSON = (configName: string) => {
-  return getPathToConfig(configName) + ".SAVE.json";
+  return getPathToConfig(configName) + ".SAFE.json";
 };
 
 const checkConfigDirExistence = () => {
@@ -102,7 +102,7 @@ export const printEnvToConsole = async (envPath: string) => {
 
 export const saveRotationToJSON = async (
   rotatingVars: string[],
-  nameOfSave: string,
+  nameOfSafe: string,
   configName: string,
   envLocation: string
 ) => {
@@ -122,16 +122,16 @@ export const saveRotationToJSON = async (
   } else {
     savedValuesJSON = envAsJSON;
   }
-  const pathToSaveJSON = getPathToJSON(configName);
-  const saveJSONFile = Bun.file(pathToSaveJSON);
-  let saveJSON = {};
-  if (await saveJSONFile.exists()) {
-    const saveJSONContent = await saveJSONFile.text();
-    saveJSON = JSON.parse(saveJSONContent);
+  const pathToSafeJSON = getPathToJSON(configName);
+  const safeJSONFile = Bun.file(pathToSafeJSON);
+  let safeJSON = {};
+  if (await safeJSONFile.exists()) {
+    const safeJSONContent = await safeJSONFile.text();
+    safeJSON = JSON.parse(safeJSONContent);
   }
-  const newSAVEJSON = { ...saveJSON, [nameOfSave]: savedValuesJSON };
-  const newSaveJSONString = JSON.stringify(newSAVEJSON);
-  await Bun.write(saveJSONFile, newSaveJSONString);
+  const newSAFEJSON = { ...safeJSON, [nameOfSafe]: savedValuesJSON };
+  const newSafeJSONString = JSON.stringify(newSAFEJSON);
+  await Bun.write(safeJSONFile, newSafeJSONString);
 };
 
 export const doesTheUserWantToCreateANewConfig = async (): Promise<boolean> => {
@@ -184,12 +184,12 @@ export const printSafesToConsole = async (
 
 export const doesTheUserWantsToDeleteASpecificSafe = async (
   configName: string,
-  nameOfSave: string
+  nameOfSafe: string
 ): Promise<boolean> => {
   console.log(
-    `Are you sure that you want to delete the safe "${nameOfSave}"?\nIt contains:`
+    `Are you sure that you want to delete the safe "${nameOfSafe}"?\nIt contains:`
   );
-  await printSafesToConsole(configName, nameOfSave);
+  await printSafesToConsole(configName, nameOfSafe);
   console.log("-------");
   console.log("If yes enter Y or else N");
   for await (const line of console) {
@@ -201,7 +201,7 @@ export const doesTheUserWantsToDeleteASpecificSafe = async (
         return false;
       default:
         console.log(
-          `You need to enter Y or N. Shall the safe "${nameOfSave}" get deleted? (Y/N)`
+          `You need to enter Y or N. Shall the safe "${nameOfSafe}" get deleted? (Y/N)`
         );
     }
   }
@@ -231,19 +231,19 @@ export const doesSafeExists = async (
 
 export const deleteRotationFromJSON = async (
   configName: string,
-  nameOfSave: string
+  nameOfSafe: string
 ) => {
-  const pathToSaveJSON = getPathToJSON(configName);
-  const saveJSONFile = Bun.file(pathToSaveJSON);
-  let saveJSON = {};
-  if (await saveJSONFile.exists()) {
-    const saveJSONContent = await saveJSONFile.text();
-    saveJSON = JSON.parse(saveJSONContent);
+  const pathToSafeJSON = getPathToJSON(configName);
+  const safeJSONFile = Bun.file(pathToSafeJSON);
+  let safeJSON = {};
+  if (await safeJSONFile.exists()) {
+    const safeJSONContent = await safeJSONFile.text();
+    safeJSON = JSON.parse(safeJSONContent);
   }
-  const newSAVEJSON = { ...saveJSON, [nameOfSave]: undefined };
-  const newSaveJSONString = JSON.stringify(newSAVEJSON);
-  await Bun.write(saveJSONFile, newSaveJSONString);
-  console.log(`Deleted safe "${nameOfSave}"`);
+  const newSAFEJSON = { ...safeJSON, [nameOfSafe]: undefined };
+  const newSafeJSONString = JSON.stringify(newSAFEJSON);
+  await Bun.write(safeJSONFile, newSafeJSONString);
+  console.log(`Deleted safe "${nameOfSafe}"`);
 };
 
 export const loadSafe = async (
