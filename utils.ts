@@ -116,9 +116,9 @@ export const saveRotationToJSON = async (
   ) as { [key: string]: string };
   let savedValuesJSON = {};
   if (rotatingVars.length) {
-    savedValuesJSON = {
-      ...rotatingVars.map((vName) => ({ [vName]: envAsJSON[vName] })),
-    };
+    savedValuesJSON = rotatingVars
+      .map((vName) => ({ [vName]: envAsJSON[vName] }))
+      .reduce((p, c) => ({ ...p, ...c }), {});
   } else {
     savedValuesJSON = envAsJSON;
   }
