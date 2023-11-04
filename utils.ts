@@ -154,7 +154,7 @@ export const doesTheUserWantToCreateANewConfig = async (): Promise<boolean> => {
   throw Error("Error reading user input");
 };
 
-export const printSavesToConsole = async (
+export const printSafesToConsole = async (
   configName: string,
   nameOfSafe?: string
 ) => {
@@ -180,4 +180,68 @@ export const printSavesToConsole = async (
       }
     }
   }
+};
+
+export const doesTheUserWantsToDeleteASpecificSafe = async (
+  configName: string,
+  nameOfSave: string
+): Promise<boolean> => {
+  console.log(
+    `Are you sure that you want to delete the safe "${nameOfSave}"?\nIt contains:`
+  );
+  await printSafesToConsole(configName, nameOfSave);
+  console.log("-------");
+  console.log("If yes enter Y or else N");
+  for await (const line of console) {
+    const argument = line.trim();
+    switch (argument) {
+      case "Y":
+        return true;
+      case "N":
+        return false;
+      default:
+        console.log(
+          `You need to enter Y or N. Shall the safe "${nameOfSave}" get deleted? (Y/N)`
+        );
+    }
+  }
+  throw Error("Error reading user input");
+};
+
+export const doesSafeExists = async (
+  configName: string,
+  nameOfSafe: string
+) => {
+  const pathToJSON = getPathToJSON(configName);
+  const jsonFile = Bun.file(pathToJSON);
+  if (!(await jsonFile.exists())) {
+    console.warn("No safes for config of current dir exists");
+    return;
+  }
+  const jsonContent = await jsonFile.text();
+  const json = JSON.parse(jsonContent);
+  if (typeof json === "object" && json !== null) {
+    const safe = json[nameOfSafe];
+    if (safe) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const deleteRotationFromJSON = async (
+  configName: string,
+  nameOfSave: string
+) => {
+  const pathToSaveJSON = getPathToJSON(configName);
+  const saveJSONFile = Bun.file(pathToSaveJSON);
+  let saveJSON = {};
+  if (await saveJSONFile.exists()) {
+    const saveJSONContent = await saveJSONFile.text();
+    saveJSON = JSON.parse(saveJSONContent);
+  }
+  const newSAVEJSON = { ...saveJSON, [nameOfSave]: undefined };
+  const newSaveJSONString = JSON.stringify(newSAVEJSON);
+  await Bun.write(saveJSONFile, newSaveJSONString);
+  console.log(`Deleted safe "${nameOfSave}"`);
 };

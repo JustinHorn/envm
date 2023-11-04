@@ -9,11 +9,14 @@ import { exit } from "process";
 
 import {
   createConfig,
+  deleteRotationFromJSON,
   doesConfigExist,
+  doesSafeExists,
   doesTheUserWantToCreateANewConfig,
+  doesTheUserWantsToDeleteASpecificSafe,
   getEnv,
   getPathToConfig,
-  printSavesToConsole,
+  printSafesToConsole,
   saveRotationToJSON,
 } from "./utils";
 import { loadConfig, openConfigWithNano, printEnvToConsole } from "./utils";
@@ -53,7 +56,24 @@ switch (argOne) {
   case "-l":
     // list saves and their names:
     const safeToList = argTwo;
-    await printSavesToConsole(configName, safeToList);
+    await printSafesToConsole(configName, safeToList);
+    exit();
+  case "-ld":
+    // delete from save
+    const safeToGetDeleted = argTwo;
+    const saveExists = await doesSafeExists(configName, safeToGetDeleted);
+    if (!saveExists) {
+      console.error(
+        `Safe "${safeToGetDeleted}" does not exist and can therefore not get deleted`
+      );
+      exit();
+    }
+    const userConfirmedDeletion = await doesTheUserWantsToDeleteASpecificSafe(
+      configName,
+      safeToGetDeleted
+    );
+    if (userConfirmedDeletion)
+      await deleteRotationFromJSON(configName, safeToGetDeleted);
     exit();
   case "-s":
     // save variables in current env as rotation
