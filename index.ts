@@ -1,10 +1,5 @@
 #! /usr/bin/env bun
 
-import { spawn } from "child_process";
-// let jsonSave: { exit } = require("./save.json") as {
-//   [key: string]: string;
-// };
-
 import { exit } from "process";
 
 import {
