@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import fs from "fs";
+import fs, { exists } from "fs";
 
 const configurationDir = import.meta.dir + "/configurations";
 
@@ -215,8 +215,8 @@ export const doesSafeExists = async (
   const pathToJSON = getPathToJSON(configName);
   const jsonFile = Bun.file(pathToJSON);
   if (!(await jsonFile.exists())) {
-    console.warn("No safes for config of current dir exists");
-    return;
+    console.warn("No safes for config of current dir exist");
+    return false;
   }
   const jsonContent = await jsonFile.text();
   const json = JSON.parse(jsonContent);
@@ -244,4 +244,64 @@ export const deleteRotationFromJSON = async (
   const newSaveJSONString = JSON.stringify(newSAVEJSON);
   await Bun.write(saveJSONFile, newSaveJSONString);
   console.log(`Deleted safe "${nameOfSave}"`);
+};
+
+export const loadSafe = async (
+  configName: string,
+  safeName: string
+): Promise<{ [key: string]: string } | false> => {
+  const pathToJSON = getPathToJSON(configName);
+  const jsonFile = Bun.file(pathToJSON);
+  if (!(await jsonFile.exists())) {
+    throw Error("No safes for config of current dir exists");
+  }
+  const jsonContent = await jsonFile.text();
+  const json = JSON.parse(jsonContent);
+  if (typeof json === "object" && json !== null) {
+    const safe = json[safeName];
+    if (safe) {
+      return safe;
+    } else {
+      return false;
+    }
+  }
+  return false;
+};
+
+export const applySafe = async (
+  safe: { [key: string]: string },
+  envLocation: string
+) => {
+  const keys = Object.keys(safe);
+  for (const key of keys) {
+    await setEnv(key, safe[key], envLocation);
+  }
+};
+
+const setEnv = async (
+  variableName: string,
+  variableValue: string,
+  envLocation: string
+) => {
+  variableName += "=";
+  const file = Bun.file(envLocation);
+  const text = await file.text();
+
+  let newFileText = "";
+
+  const index = text.indexOf(variableName);
+
+  if (index !== -1) {
+    // if variable already exists
+    const newLineIndex = text.indexOf("\n", index + variableName.length);
+    newFileText =
+      text.slice(0, index + variableName.length) +
+      variableValue +
+      text.slice(newLineIndex);
+  } else {
+    newFileText = variableName + variableValue + "\n" + text;
+  }
+
+  Bun.write(file, newFileText);
+  console.log(`Set variable ${variableName} successfully`);
 };

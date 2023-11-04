@@ -8,6 +8,7 @@ import { spawn } from "child_process";
 import { exit } from "process";
 
 import {
+  applySafe,
   createConfig,
   deleteRotationFromJSON,
   doesConfigExist,
@@ -16,6 +17,7 @@ import {
   doesTheUserWantsToDeleteASpecificSafe,
   getEnv,
   getPathToConfig,
+  loadSafe,
   printSafesToConsole,
   saveRotationToJSON,
 } from "./utils";
@@ -53,6 +55,25 @@ const argTwo = Bun.argv[3];
 const envLocation = configOffset + config.envLocation;
 
 switch (argOne) {
+  case "-a":
+    // apply a safe
+    const safeToBeApplied = argTwo;
+    if (!safeToBeApplied) {
+      console.error(
+        "You need to provide a safe version to apply: setenv -a nameOfSafe"
+      );
+      exit();
+    }
+    const safe = await loadSafe(configName, safeToBeApplied);
+    if (!safe) {
+      console.error(
+        `Safe "${safeToBeApplied}" does not exist and can therefore not be applied.`
+      );
+      exit();
+    }
+    await applySafe(safe, envLocation);
+    console.log("Set all variables successfully.");
+    exit();
   case "-l":
     // list saves and their names:
     const safeToList = argTwo;
@@ -90,6 +111,7 @@ switch (argOne) {
         `You need to provide a second argument as name for the save: setenv -s nameOfSave...`
       );
     }
+    console.log(`Saved current rotation as "${saveName}"`);
     exit();
   case "-g":
     // get variables in current env
@@ -111,30 +133,6 @@ switch (argOne) {
 //   jsonSave = { ...jsonSave, [valueOne]: valueTwo };
 
 //   await Bun.write(file, JSON.stringify(jsonSave));
-// };
-
-// const setEnv = async (variableName: string, variableValue: string) => {
-//   variableName += "=";
-//   const file = Bun.file(path);
-//   const text = await file.text();
-
-//   let newFileText = "";
-
-//   const index = text.indexOf(variableName);
-
-//   if (index !== -1) {
-//     // if variable already exists
-//     const newLineIndex = text.indexOf("\n", index + variableName.length);
-//     newFileText =
-//       text.slice(0, index + variableName.length) +
-//       variableValue +
-//       text.slice(newLineIndex);
-//   } else {
-//     newFileText = variableName + variableValue + "\n" + text;
-//   }
-
-//   Bun.write(file, newFileText);
-//   console.log(`Set variable ${variableName} successfully`);
 // };
 
 // const removeEnv = async (variableName: string) => {
