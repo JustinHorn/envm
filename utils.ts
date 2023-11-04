@@ -133,7 +133,7 @@ export const saveRotationToJSON = async (
 
 export const doesTheUserWantToCreateANewConfig = async (): Promise<boolean> => {
   console.log(
-    "No config exists in the scope of this directory shall a new one at this location get created? (Y/N)"
+    "No setenv config exists in the scope of this directory. Shall a new one at this location get created? (Y/N)"
   );
   for await (const line of console) {
     const argument = line.trim();
@@ -144,7 +144,7 @@ export const doesTheUserWantToCreateANewConfig = async (): Promise<boolean> => {
         return false;
       default:
         console.log(
-          "You need to enter Y or N. Shall a new config be created? (Y/N)"
+          "You need to enter Y or N. Shall a new setenv config be created? (Y/N)"
         );
     }
   }
