@@ -130,3 +130,23 @@ export const saveRotationToJSON = async (
   const newSaveJSONString = JSON.stringify(newSAVEJSON);
   await Bun.write(saveJSONFile, newSaveJSONString);
 };
+
+export const doesTheUserWantToCreateANewConfig = async (): Promise<boolean> => {
+  console.log(
+    "No config exists in the scope of this directory shall a new one at this location get created? (Y/N)"
+  );
+  for await (const line of console) {
+    const argument = line.trim();
+    switch (argument) {
+      case "Y":
+        return true;
+      case "N":
+        return false;
+      default:
+        console.log(
+          "You need to enter Y or N. Shall a new config be created? (Y/N)"
+        );
+    }
+  }
+  throw Error("Error reading user input");
+};

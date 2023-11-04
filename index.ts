@@ -10,6 +10,7 @@ import { exit } from "process";
 import {
   createConfig,
   doesConfigExist,
+  doesTheUserWantToCreateANewConfig,
   getEnv,
   getPathToConfig,
   saveRotationToJSON,
@@ -34,6 +35,8 @@ while (!configExists && configName.split(".").length >= 2) {
 }
 
 if (!configExists) {
+  const wantNewConfig = await doesTheUserWantToCreateANewConfig();
+  if (!wantNewConfig) exit();
   // we could not find a config so create one
   configName = originalConfigName;
   await createConfig(configName);
