@@ -283,23 +283,26 @@ const setEnv = async (
   variableValue: string,
   envLocation: string
 ) => {
-  variableName += "=";
+  const variableNameWithOperator = variableName + "=";
   const file = Bun.file(envLocation);
   const text = await file.text();
 
   let newFileText = "";
 
-  const index = text.indexOf(variableName);
+  const index = text.indexOf(variableNameWithOperator);
 
   if (index !== -1) {
     // if variable already exists
-    const newLineIndex = text.indexOf("\n", index + variableName.length);
+    const newLineIndex = text.indexOf(
+      "\n",
+      index + variableNameWithOperator.length
+    );
     newFileText =
-      text.slice(0, index + variableName.length) +
+      text.slice(0, index + variableNameWithOperator.length) +
       variableValue +
       text.slice(newLineIndex);
   } else {
-    newFileText = variableName + variableValue + "\n" + text;
+    newFileText = variableNameWithOperator + variableValue + "\n" + text;
   }
 
   Bun.write(file, newFileText);
