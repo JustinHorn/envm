@@ -8,8 +8,8 @@ import {
   deleteRotationFromJSON,
   doesConfigExist,
   doesRotationExists,
-  doesTheUserWantToCreateANewConfig,
   doesTheUserWantsToDeleteRotationX,
+  doesTheUserWantToCreateANewConfig,
   getEnv,
   getPathToConfig,
   loadRotation,
@@ -59,18 +59,18 @@ switch (argOne) {
       );
       exit();
     }
-    const safe = await loadRotation(configName, safeToBeApplied);
-    if (!safe) {
+    const rotation = await loadRotation(configName, safeToBeApplied);
+    if (!rotation) {
       console.error(
-        `Safe "${safeToBeApplied}" does not exist and can therefore not be applied.`
+        `Rotation "${safeToBeApplied}" does not exist and can therefore not be applied.`
       );
       exit();
     }
-    await applyRotation(safe, envLocation);
+    await applyRotation(rotation, envLocation);
     console.log("Set all variables successfully.");
     exit();
   case "-l":
-    // list safes and their names:
+    // list rotation names:
     const nameOfRotation = argTwo;
     await printRotationNamesOrRotationContent(configName, nameOfRotation);
     exit();
