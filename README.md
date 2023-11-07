@@ -28,4 +28,5 @@ You can also delete a rotation with `envm -ld rotationName`
 - run `bun install`
 - run `bun link`
 
-then you should be able to use this tool like `envm ...`` in your console;
+then you should be able to use this tool like `envm ...` in your console.  
+This tool only works on UNIX based/related operating systems.
