@@ -1,5 +1,5 @@
 {
-  "name": "setenv",
+  "name": "envm",
   "version": "0.0.1",
   "devDependencies": {
     "bun-types": "latest"
@@ -8,6 +8,6 @@
     "typescript": "^5.0.0"
   },
   "bin": {
-    "setenv": "index.ts"
+    "envm": "index.ts"
   }
 }
